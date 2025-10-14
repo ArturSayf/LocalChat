@@ -53,6 +53,10 @@ func sendMessage(w http.ResponseWriter, r *http.Request) {
 
 	mu.Lock()
 	messages = append(messages, m)
+
+	if len(messages) > 10 {
+		messages = messages[1:]
+	}
 	mu.Unlock()
 
 	w.Header().Set("Content-Type", "application/json")
@@ -64,16 +68,7 @@ func getMessages(w http.ResponseWriter, r *http.Request) {
 	mu.Lock()
 	defer mu.Unlock()
 
-	messageCount := len(messages)
-
-	startIndex := 0
-	if messageCount > 10 {
-		startIndex = messageCount - 10
-	}
-
-	lastTenMessages := messages[startIndex:]
-
-	json.NewEncoder(w).Encode(lastTenMessages)
+	json.NewEncoder(w).Encode(messages)
 }
 
 func main() {
